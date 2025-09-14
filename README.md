@@ -96,145 +96,6 @@ A production-ready REST API for Stocky, a hypothetical company where users can e
 
 The API will be available at `http://localhost:3000`
 
-## 📚 API Documentation
-
-### Authentication
-In production, include the API key in headers:
-```
-X-API-Key: your-api-key
-```
-
-### Endpoints
-
-#### 1. Create Reward
-```http
-POST /reward
-Content-Type: application/json
-
-{
-  "userId": "550e8400-e29b-41d4-a716-446655440000",
-  "stockSymbol": "RELIANCE",
-  "quantity": 2.5,
-  "timestamp": "2024-01-15T10:30:00.000Z",
-  "eventRef": "onboarding-bonus-2024-01-15-001"
-}
-```
-
-**Response:**
-```json
-{
-  "status": "success",
-  "rewardId": "660e8400-e29b-41d4-a716-446655440001",
-  "message": "Reward recorded successfully"
-}
-```
-
-#### 2. Get Today's Stocks
-```http
-GET /today-stocks/550e8400-e29b-41d4-a716-446655440000
-```
-
-**Response:**
-```json
-{
-  "userId": "550e8400-e29b-41d4-a716-446655440000",
-  "date": "2024-01-15",
-  "rewards": [
-    {
-      "symbol": "RELIANCE",
-      "quantity": 2.5,
-      "rewardedAt": "2024-01-15T10:30:00.000Z"
-    },
-    {
-      "symbol": "TCS",
-      "quantity": 1.0,
-      "rewardedAt": "2024-01-15T14:20:00.000Z"
-    }
-  ]
-}
-```
-
-#### 3. Get Historical INR Values
-```http
-GET /historical-inr/550e8400-e29b-41d4-a716-446655440000
-```
-
-**Response:**
-```json
-{
-  "userId": "550e8400-e29b-41d4-a716-446655440000",
-  "history": [
-    {
-      "date": "2024-01-14",
-      "totalValueINR": 12500.75
-    },
-    {
-      "date": "2024-01-13",
-      "totalValueINR": 11800.50
-    }
-  ]
-}
-```
-
-#### 4. Get User Statistics
-```http
-GET /stats/550e8400-e29b-41d4-a716-446655440000
-```
-
-**Response:**
-```json
-{
-  "todayTotals": [
-    {
-      "symbol": "RELIANCE",
-      "quantity": 2.5
-    },
-    {
-      "symbol": "TCS",
-      "quantity": 1.0
-    }
-  ],
-  "portfolioValueINR": 12500.75
-}
-```
-
-#### 5. Get Portfolio (Bonus)
-```http
-GET /portfolio/550e8400-e29b-41d4-a716-446655440000
-```
-
-**Response:**
-```json
-{
-  "portfolio": [
-    {
-      "symbol": "RELIANCE",
-      "totalShares": 5.5,
-      "currentValueINR": 13750.00
-    },
-    {
-      "symbol": "TCS",
-      "totalShares": 2.0,
-      "currentValueINR": 6400.00
-    }
-  ]
-}
-```
-
-### Error Responses
-All endpoints return consistent error responses:
-```json
-{
-  "status": "error",
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Valid userId is required"
-  },
-  "timestamp": "2024-01-15T10:30:00.000Z",
-  "requestId": "req_1705312200000_abc123def"
-}
-```
-
 ## 🧪 Testing
 
 ### Manual Testing
@@ -250,19 +111,6 @@ After running `npm run seed`, you'll have:
 - 30 days of historical price data
 
 ### Test Scenarios
-
-#### 1. Create a Reward
-```bash
-curl -X POST http://localhost:3000/reward \
-  -H "Content-Type: application/json" \
-  -d '{
-    "userId": "USER_ID_FROM_SEED",
-    "stockSymbol": "RELIANCE",
-    "quantity": 1.5,
-    "timestamp": "2024-01-15T10:30:00.000Z",
-    "eventRef": "test-reward-001"
-  }'
-```
 
 #### 2. Test Idempotency
 Run the same request twice - second should return conflict error.
@@ -292,41 +140,6 @@ The system uses PostgreSQL with:
 - Prepared statements
 - Automatic reconnection
 
-## 📊 Database Schema Details
-
-### Double-Entry Accounting
-Every reward creates multiple ledger entries:
-1. **USER_STOCK** (Debit): User receives stock
-2. **BROKERAGE_FEE** (Credit): Company pays brokerage
-3. **STT** (Credit): Securities Transaction Tax
-4. **GST** (Credit): Goods and Services Tax
-5. **SEBI_FEE** (Credit): SEBI charges
-6. **STAMP_DUTY** (Credit): Stamp duty
-7. **CASH_OUTFLOW** (Credit): Cash spent on stock purchase
-
-### Fee Structure (Indian Market)
-- Brokerage: 0.03% of trade value
-- STT: 0.025% on delivery
-- GST: 18% on brokerage + exchange charges
-- SEBI Fee: Rs 9.8 per crore
-- Stamp Duty: 0.015% on buy side
-
-## 🚀 Production Deployment
-
-### Prerequisites
-- PostgreSQL 12+ with SSL
-- Node.js 18+ with PM2 or similar
-- Reverse proxy (nginx)
-- SSL certificate
-
-### Environment Setup
-```bash
-NODE_ENV=production
-DATABASE_SSL=true
-API_KEY=your-secure-api-key
-JWT_SECRET=your-secure-jwt-secret
-LOG_LEVEL=warn
-```
 
 ### Security Considerations
 - Change default JWT secret
@@ -338,82 +151,17 @@ LOG_LEVEL=warn
 
 ## 📈 Monitoring & Logging
 
-### Log Levels
-- `error`: System errors and exceptions
-- `warn`: Warning conditions
-- `info`: General information
-- `http`: HTTP request/response logs
-- `debug`: Detailed debugging information
-
-### Log Files
-- `logs/error.log`: Error-level logs only
-- `logs/combined.log`: All log levels
-- Console output with colorized formatting
-
-### Health Checks
-- Database connectivity
-- Stock price service status
-- Memory usage
-- Uptime tracking
-
-## 🔄 Stock Price Service
-
-### Mock Pricing Features
-- Realistic base prices for Indian stocks
-- 2% daily volatility simulation
-- Price bounds (50%-200% of base price)
-- Historical price generation
-- Hourly price updates (configurable)
-
-### Supported Stocks
-Major Indian stocks including RELIANCE, TCS, INFY, HDFC, ICICIBANK, ITC, BHARTIARTL, KOTAKBANK, LT, AXISBANK, MARUTI, ASIANPAINT, WIPRO, TITAN, ULTRACEMCO, NESTLEIND, BAJFINANCE, POWERGRID, NTPC.
-
-## 🛡️ Error Handling
-
-### Error Types
-- `ValidationError`: Input validation failures
-- `NotFoundError`: Resource not found
-- `ConflictError`: Duplicate resources
-- `StockyError`: Custom application errors
-
 ### Database Errors
 - Unique constraint violations
 - Foreign key violations
 - Not null violations
 - Check constraint violations
 
-## 📝 Scripts
 
-| Script | Description |
-|--------|-------------|
-| `npm run dev` | Start development server |
-| `npm run dev:watch` | Start with file watching |
-| `npm run build` | Build TypeScript to JavaScript |
-| `npm start` | Start production server |
-| `npm run migrate` | Run database migrations |
-| `npm run seed` | Seed sample data |
-| `npm run lint` | Run ESLint |
-| `npm run format` | Format code with Prettier |
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
 
 ## 📄 License
 
 MIT License - see LICENSE file for details
-
-## 🆘 Support
-
-For questions or issues:
-1. Check the API documentation at `/api-docs`
-2. Review the logs in `logs/` directory
-3. Check database connectivity
-4. Verify environment variables
 
 ---
 
